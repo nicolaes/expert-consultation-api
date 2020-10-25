@@ -40,7 +40,7 @@ app:
   jwtSecret: ORy9HWgKoZPAs50ECKw0
   jwtExpirationInMs: 1728000000   # two days expiration time, can be extended
   email:
-    documenturl: ${DOMAIN_URL:https://staging.legiinlucru.ro}/api/documents/ #TODO: change this once the app is deployed and a domain exists
+    documenturl: ${DOMAIN_URL:https://staging.legiinlucru.ro}/documents #TODO: change this once the app is deployed and a domain exists
     signupurl: ${DOMAIN_URL:https://staging.legiinlucru.ro}/register
     sender: ${AWS_SES_EMAIL}
 storage:

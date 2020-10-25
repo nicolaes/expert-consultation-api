@@ -41,8 +41,8 @@ app:
   jwtSecret: ORy9HWgKoZPAs50ECKw0
   jwtExpirationInMs: 1728000000   # two days expiration time, can be extended
   email:
-    documenturl: http://localhost:4200/api/documents/
-    signupurl: http://localhost:4200/authentication/sign-up
+    documenturl: http://localhost:4200/documents
+    signupurl: http://localhost:4200/register
     sender: noreply@legalconsultation.ro # temporary value. change this to a real email that is validated in SES : https://docs.aws.amazon.com/ses/latest/DeveloperGuide/verify-email-addresses-procedure.html
 storage:
   aws:
