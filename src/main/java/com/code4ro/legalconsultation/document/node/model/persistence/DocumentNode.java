@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Entity
 @Table(name = "document_nodes")
@@ -14,7 +15,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class DocumentNode extends BaseEntity {
 
-    @ManyToOne(cascade = { CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST})
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinColumn(name = "parent")
     @ToString.Exclude
     private DocumentNode parent;
@@ -38,4 +39,11 @@ public class DocumentNode extends BaseEntity {
 
     @Column(name = "node_index")
     private Integer index;
+
+    public Stream<DocumentNode> flattened() {
+        return Stream.concat(
+                Stream.of(this),
+                children != null ? children.stream().flatMap(DocumentNode::flattened) : Stream.empty());
+    }
+
 }

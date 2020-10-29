@@ -3,6 +3,7 @@ package com.code4ro.legalconsultation.comment.factory;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDetailDto;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDto;
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
+import com.code4ro.legalconsultation.comment.model.persistence.CommentStatus;
 import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.factory.RandomObjectFiller;
 import com.code4ro.legalconsultation.authentication.model.persistence.ApplicationUser;
@@ -23,7 +24,7 @@ public final class CommentFactory {
         final CommentDto commentDto = RandomObjectFiller.createAndFill(CommentDto.class);
         if (commentDto == null) throw new IllegalArgumentException("Failed to create the comment");
         commentDto.setLastEditDateTime(new Date());
-        commentDto.setStatus(null);
+        commentDto.setStatus(CommentStatus.PENDING);
         return commentDto;
     }
 

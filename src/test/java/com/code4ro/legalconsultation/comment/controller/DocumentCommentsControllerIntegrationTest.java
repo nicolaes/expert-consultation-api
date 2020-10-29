@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @EnableJpaAuditing
-public class CommentControllerIntegrationTest extends AbstractControllerIntegrationTest {
+public class DocumentCommentsControllerIntegrationTest extends AbstractControllerIntegrationTest {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -42,8 +42,6 @@ public class CommentControllerIntegrationTest extends AbstractControllerIntegrat
     private DocumentNodeFactory documentNodeFactory;
     @Autowired
     private CurrentUserService currentUserService;
-    @Autowired
-    private ApplicationUserService applicationUserService;
 
     @Before
     public void before() {
@@ -122,9 +120,13 @@ public class CommentControllerIntegrationTest extends AbstractControllerIntegrat
     @Transactional
     public void findAll() throws Exception {
         final DocumentNode node = documentNodeFactory.save();
-        commentService.create(node.getId(), commentFactory.create());
-        commentService.create(node.getId(), commentFactory.create());
-        commentService.create(node.getId(), commentFactory.create());
+        final CommentDetailDto comment1 = commentService.create(node.getId(), commentFactory.create());
+        final CommentDetailDto comment2 = commentService.create(node.getId(), commentFactory.create());
+        final CommentDetailDto comment3 = commentService.create(node.getId(), commentFactory.create());
+
+        commentService.setStatus(comment1.getId(), APPROVED);
+        commentService.setStatus(comment2.getId(), APPROVED);
+        commentService.setStatus(comment3.getId(), APPROVED);
 
         mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments?page=0"))
                 .accept(MediaType.APPLICATION_JSON))
@@ -151,7 +153,7 @@ public class CommentControllerIntegrationTest extends AbstractControllerIntegrat
     public void approve() throws Exception {
         final DocumentNode node = documentNodeFactory.save();
         CommentDetailDto comment = commentService.create(node.getId(), commentFactory.create());
-        mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments/", comment.getId(), "/approve"))
+        mvc.perform(get(endpoint("/api/comments/", comment.getId(), "/approve"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(APPROVED.toString()))
                 .andExpect(status().isOk());
@@ -163,7 +165,7 @@ public class CommentControllerIntegrationTest extends AbstractControllerIntegrat
     public void reject() throws Exception {
         final DocumentNode node = documentNodeFactory.save();
         CommentDetailDto comment = commentService.create(node.getId(), commentFactory.create());
-        mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments/", comment.getId(), "/reject"))
+        mvc.perform(get(endpoint("/api/comments/", comment.getId(), "/reject"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(REJECTED.toString()))
                 .andExpect(status().isOk());

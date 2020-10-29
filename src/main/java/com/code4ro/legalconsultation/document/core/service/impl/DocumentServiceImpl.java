@@ -5,6 +5,7 @@ import com.code4ro.legalconsultation.document.consolidated.mapper.DocumentConsol
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsultationDataDto;
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
+import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.consolidated.service.DocumentConsolidatedService;
 import com.code4ro.legalconsultation.document.core.service.DocumentService;
 import com.code4ro.legalconsultation.document.export.model.DocumentExportFormat;
@@ -34,10 +35,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -181,6 +185,17 @@ public class DocumentServiceImpl implements DocumentService {
         final DocumentConsolidated documentConsolidated = documentConsolidatedService.getEntity(id);
         return exporter.export(documentConsolidated);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UUID> getAllAssignedDocumentsNodeIds(final User user) {
+        final List<DocumentConsolidated> documents = documentConsolidatedService.getAllAssignedDocuments(user);
+        return documents.stream()
+                .flatMap(document -> document.getDocumentNode().flattened())
+                .map(DocumentNode::getId)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public void addConsultationData(final UUID id, final DocumentConsultationDataDto consultationDataDto) {

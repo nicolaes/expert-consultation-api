@@ -3,6 +3,8 @@ package com.code4ro.legalconsultation.document.core.controller;
 import com.amazonaws.util.json.Jackson;
 import com.code4ro.legalconsultation.comment.factory.CommentFactory;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDetailDto;
+import com.code4ro.legalconsultation.comment.model.persistence.CommentStatus;
+import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.controller.AbstractControllerIntegrationTest;
 import com.code4ro.legalconsultation.core.factory.RandomObjectFiller;
 import com.code4ro.legalconsultation.document.configuration.model.persistence.DocumentConfiguration;
@@ -53,6 +55,8 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
     private DocumentNodeFactory documentNodeFactory;
     @Autowired
     private CommentFactory commentFactory;
+    @Autowired
+    private CommentService commentService;
 
     @Test
     @WithMockUser
@@ -260,9 +264,15 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
         CommentDetailDto comment1 = commentFactory.save(consolidated.getDocumentNode().getId());
         CommentDetailDto comment2 = commentFactory.save(consolidated.getDocumentNode().getId());
 
-        commentFactory.saveReply(comment1.getId());
-        commentFactory.saveReply(comment1.getId());
-        commentFactory.saveReply(comment2.getId());
+        final CommentDetailDto reply1 = commentFactory.saveReply(comment1.getId());
+        final CommentDetailDto reply2 = commentFactory.saveReply(comment1.getId());
+        final CommentDetailDto reply3 = commentFactory.saveReply(comment2.getId());
+
+        commentService.setStatus(comment1.getId(), CommentStatus.APPROVED);
+        commentService.setStatus(comment2.getId(), CommentStatus.APPROVED);
+        commentService.setStatus(reply1.getId(), CommentStatus.APPROVED);
+        commentService.setStatus(reply2.getId(), CommentStatus.APPROVED);
+        commentService.setStatus(reply3.getId(), CommentStatus.APPROVED);
 
         mvc.perform(get(endpoint("/api/documents/", consolidated.getDocumentMetadata().getId(), "/consolidated"))
                 .accept(MediaType.APPLICATION_JSON))

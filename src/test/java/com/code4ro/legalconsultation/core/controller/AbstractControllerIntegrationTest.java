@@ -37,11 +37,10 @@ public abstract class AbstractControllerIntegrationTest {
     protected ApplicationUserService applicationUserService;
     @MockBean
     protected JavaMailSender mailSender;
-
     @Autowired
-    private UserRepository userRepository;
+    protected UserRepository userRepository;
     @Autowired
-    private InvitationRepository invitationRepository;
+    protected InvitationRepository invitationRepository;
 
     protected static String endpoint(Object... args) {
         final List<String> stringArgs = Arrays.stream(args)

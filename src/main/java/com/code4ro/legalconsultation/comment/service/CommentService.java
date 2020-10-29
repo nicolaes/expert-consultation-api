@@ -28,4 +28,6 @@ public interface CommentService {
     CommentDto setStatus(UUID commentId, CommentStatus approved);
 
     Comment findById(UUID id);
+
+    Page<Comment> findAllPending(Pageable pageable);
 }

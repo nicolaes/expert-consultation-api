@@ -7,6 +7,7 @@ import com.code4ro.legalconsultation.comment.model.persistence.CommentStatus;
 import com.code4ro.legalconsultation.comment.service.impl.CommentServiceImpl;
 import com.code4ro.legalconsultation.core.exception.LegalValidationException;
 import com.code4ro.legalconsultation.comment.factory.CommentFactory;
+import com.code4ro.legalconsultation.document.core.service.DocumentService;
 import com.code4ro.legalconsultation.document.node.factory.DocumentNodeFactory;
 import com.code4ro.legalconsultation.core.factory.RandomObjectFiller;
 import com.code4ro.legalconsultation.authentication.model.persistence.ApplicationUser;
@@ -14,6 +15,7 @@ import com.code4ro.legalconsultation.document.node.model.persistence.DocumentNod
 import com.code4ro.legalconsultation.comment.repository.CommentRepository;
 import com.code4ro.legalconsultation.document.node.service.DocumentNodeService;
 import com.code4ro.legalconsultation.security.service.CurrentUserService;
+import com.code4ro.legalconsultation.user.factory.UserFactory;
 import com.code4ro.legalconsultation.user.model.persistence.UserRole;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +44,8 @@ public class CommentServiceTest {
     public static final CommentStatus NEW_STATUS = CommentStatus.APPROVED;
     private final DocumentNodeFactory documentNodeFactory = new DocumentNodeFactory();
     private final CommentFactory commentFactory = new CommentFactory();
+    private final UserFactory userFactory = new UserFactory();
+
     @Mock
     private CommentRepository commentRepository;
     @Mock
@@ -50,6 +54,8 @@ public class CommentServiceTest {
     private CurrentUserService currentUserService;
     @Mock
     private DocumentNodeService documentNodeService;
+    @Mock
+    private DocumentService documentService;
     @InjectMocks
     private CommentServiceImpl commentService;
     @Captor
@@ -134,7 +140,7 @@ public class CommentServiceTest {
         Comment comment1 = new Comment();
         comment1.setText(text);
 
-        when(commentRepository.findByDocumentNodeIdAndParentIsNull(nodeId, pageable))
+        when(commentRepository.findByDocumentNodeIdAndParentIsNullAndStatus(nodeId, CommentStatus.APPROVED, pageable))
                 .thenReturn(new PageImpl<>(List.of(comment1)));
 
         //when
@@ -213,4 +219,60 @@ public class CommentServiceTest {
         assertThat(reply.getDocumentNode()).isNull();
     }
 
+    @Test
+    public void findAllPendingWithAdminUser() {
+        final Pageable pageable = mock(Pageable.class);
+        final ApplicationUser adminUser = userFactory.createApplicationUserWithRole(UserRole.ADMIN);
+        final Comment comment1 = commentFactory.createEntity();
+        final Comment comment2 = commentFactory.createEntity();
+
+        when(currentUserService.getCurrentUser()).thenReturn(adminUser);
+        when(commentRepository.findAllByStatus(CommentStatus.PENDING, pageable))
+                .thenReturn(new PageImpl<>(List.of(comment1, comment2)));
+
+        final Page<Comment> pendingComments = commentService.findAllPending(pageable);
+
+        assertThat(pendingComments.getTotalElements()).isEqualTo(2);
+        assertThat(pendingComments.getContent()).hasSize(2);
+        assertThat(pendingComments.getContent()).containsExactly(comment1, comment2);
+    }
+
+    @Test
+    public void findAllPendingWithOwnerUser() {
+        final Pageable pageable = mock(Pageable.class);
+        final ApplicationUser ownerUser = userFactory.createApplicationUserWithRole(UserRole.OWNER);
+        final Comment comment1 = commentFactory.createEntity();
+        final Comment comment2 = commentFactory.createEntity();
+
+        when(currentUserService.getCurrentUser()).thenReturn(ownerUser);
+        when(commentRepository.findAllByStatus(CommentStatus.PENDING, pageable))
+                .thenReturn(new PageImpl<>(List.of(comment1, comment2)));
+
+        final Page<Comment> pendingComments = commentService.findAllPending(pageable);
+
+        assertThat(pendingComments.getTotalElements()).isEqualTo(2);
+        assertThat(pendingComments.getContent()).hasSize(2);
+        assertThat(pendingComments.getContent()).containsExactly(comment1, comment2);
+    }
+
+    @Test
+    public void findAllPendingWithRegularUser() {
+        final Pageable pageable = mock(Pageable.class);
+        final ApplicationUser ownerUser = userFactory.createApplicationUserWithRole(UserRole.CONTRIBUTOR);
+        final Comment comment1 = commentFactory.createEntity();
+        final Comment comment2 = commentFactory.createEntity();
+        final List<UUID> documentNodesIds = List.of(UUID.randomUUID(), UUID.randomUUID());
+
+        when(currentUserService.getCurrentUser()).thenReturn(ownerUser);
+        when(documentService.getAllAssignedDocumentsNodeIds(ownerUser.getUser()))
+                .thenReturn(documentNodesIds);
+        when(commentRepository.findAllByDocumentNode_IdInAndStatus(documentNodesIds, CommentStatus.PENDING, pageable))
+                .thenReturn(new PageImpl<>(List.of(comment1, comment2)));
+
+        final Page<Comment> pendingComments = commentService.findAllPending(pageable);
+
+        assertThat(pendingComments.getTotalElements()).isEqualTo(2);
+        assertThat(pendingComments.getContent()).hasSize(2);
+        assertThat(pendingComments.getContent()).containsExactly(comment1, comment2);
+    }
 }

@@ -9,6 +9,7 @@ import com.code4ro.legalconsultation.document.metadata.model.dto.DocumentViewDto
 import com.code4ro.legalconsultation.document.metadata.model.persistence.DocumentMetadata;
 import com.code4ro.legalconsultation.pdf.model.dto.PdfHandleDto;
 import com.code4ro.legalconsultation.user.model.dto.UserDto;
+import com.code4ro.legalconsultation.user.model.persistence.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,6 +55,8 @@ public interface DocumentService {
     PdfHandleDto addPdf(final UUID id, final String state, final MultipartFile file);
 
     byte[] export(final UUID id, final DocumentExportFormat type);
+
+    List<UUID> getAllAssignedDocumentsNodeIds(User user);
 
     void addConsultationData(final UUID id, final DocumentConsultationDataDto consultationDataDto);
 
