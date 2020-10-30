@@ -18,7 +18,4 @@ public class DocumentConsolidatedDto extends BaseEntityDto {
     private DocumentNodeDto documentNode;
     private DocumentConfigurationDto documentConfiguration;
     private List<UserDto> assignedUsers;
-    private Date startDate;
-    private Date consultationDeadline;
-    private Boolean excludedFromConsultation;
 }

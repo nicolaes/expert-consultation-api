@@ -1,10 +1,9 @@
 package com.code4ro.legalconsultation.document.core.service.impl;
 
 import com.code4ro.legalconsultation.document.configuration.model.persistence.DocumentConfiguration;
+import com.code4ro.legalconsultation.document.configuration.service.DocumentConfigurationService;
 import com.code4ro.legalconsultation.document.consolidated.mapper.DocumentConsolidatedMapper;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
-import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsultationDataDto;
-import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.consolidated.service.DocumentConsolidatedService;
 import com.code4ro.legalconsultation.document.core.service.DocumentService;
@@ -26,8 +25,6 @@ import com.code4ro.legalconsultation.user.mapper.UserMapper;
 import com.code4ro.legalconsultation.user.model.dto.UserDto;
 import com.code4ro.legalconsultation.user.model.persistence.User;
 import com.code4ro.legalconsultation.user.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,13 +32,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -57,6 +51,8 @@ public class DocumentServiceImpl implements DocumentService {
     private final DocumentConsolidatedMapper documentConsolidatedMapper;
     private final PdfHandleMapper pdfHandleMapper;
     private final DocumentExporterFactory documentExporterFactory;
+    private final DocumentConfigurationService documentConfigurationService;
+
 
     @Autowired
     public DocumentServiceImpl(final DocumentConsolidatedService documentConsolidatedService,
@@ -69,7 +65,8 @@ public class DocumentServiceImpl implements DocumentService {
                                final DocumentConsolidatedMapper documentConsolidatedMapper,
                                final PdfHandleMapper pdfHandleMapper,
                                final DocumentExporterFactory documentExporterFactory,
-                               final MailApi mailService) {
+                               final MailApi mailService,
+                               final DocumentConfigurationService documentConfigurationService) {
         this.documentConsolidatedService = documentConsolidatedService;
         this.documentMetadataService = documentMetadataService;
         this.pdfService = pdfService;
@@ -81,6 +78,7 @@ public class DocumentServiceImpl implements DocumentService {
         this.pdfHandleMapper = pdfHandleMapper;
         this.documentExporterFactory = documentExporterFactory;
         this.mailService = mailService;
+        this.documentConfigurationService = documentConfigurationService;
     }
 
     @Transactional(readOnly = true)
@@ -120,9 +118,15 @@ public class DocumentServiceImpl implements DocumentService {
         metadata.setFilePath(document.getFilePath());
         final String pdfContent = pdfService.readAsString(storageApi.loadFile(document.getFilePath()));
         final DocumentNode documentNode = documentNodeService.parse(pdfContent);
-        final DocumentConfiguration documentConfiguration = new DocumentConfiguration(true, true);
+        final DocumentConsolidated documentConsolidated = new DocumentConsolidated(metadata, documentNode);
+        final DocumentConsolidated savedDocumentConsolidated =
+                documentConsolidatedService.saveOne(documentConsolidated);
 
-        return documentConsolidatedService.saveOne(new DocumentConsolidated(metadata, documentNode, documentConfiguration));
+        final DocumentConfiguration documentConfiguration = new DocumentConfiguration(true, true);
+        documentConfiguration.setDocumentConsolidated(documentConsolidated);
+        documentConfigurationService.saveOne(documentConfiguration);
+
+        return savedDocumentConsolidated;
     }
 
     @Transactional
@@ -194,22 +198,5 @@ public class DocumentServiceImpl implements DocumentService {
                 .flatMap(document -> document.getDocumentNode().flattened())
                 .map(DocumentNode::getId)
                 .collect(Collectors.toList());
-    }
-
-
-    @Override
-    public void addConsultationData(final UUID id, final DocumentConsultationDataDto consultationDataDto) {
-        final DocumentConsolidated documentConsolidated = documentConsolidatedService.getByDocumentMetadataId(id);
-        documentConsolidated.setStartDate(consultationDataDto.getStartDate());
-        documentConsolidated.setConsultationDeadline(consultationDataDto.getConsultationDeadline());
-        documentConsolidated.setExcludedFromConsultation(consultationDataDto.getExcludedFromConsultation());
-        documentConsolidatedService.saveOne(documentConsolidated);
-    }
-
-    @Override
-    public DocumentConsultationDataDto getConsultationData(final UUID id) {
-        final DocumentConsolidated documentConsolidated = documentConsolidatedService.getByDocumentMetadataId(id);
-        return new DocumentConsultationDataDto(documentConsolidated.getStartDate(),
-                documentConsolidated.getConsultationDeadline(), documentConsolidated.getExcludedFromConsultation());
     }
 }

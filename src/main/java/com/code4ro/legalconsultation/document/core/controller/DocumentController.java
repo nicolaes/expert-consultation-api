@@ -1,6 +1,7 @@
 package com.code4ro.legalconsultation.document.core.controller;
 
 import com.code4ro.legalconsultation.core.model.dto.PageDto;
+import com.code4ro.legalconsultation.document.configuration.service.DocumentConfigurationService;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsultationDataDto;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentUserAssignmentDto;
@@ -21,7 +22,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -34,6 +43,7 @@ import java.util.UUID;
 public class DocumentController {
 
     private final DocumentService documentService;
+    private final DocumentConfigurationService documentConfigurationService;
 
     @ApiOperation(value = "Return document metadata for all documents in the platform",
             response = PageDto.class,
@@ -140,19 +150,20 @@ public class DocumentController {
     }
 
     @ApiOperation("Add consultation data to a document")
-    @PostMapping("/{id}/consultation")
+    @PostMapping("/{metadataId}/consultation")
     public ResponseEntity<Void> addConsultationData(
-            @ApiParam(value = "Id of the document being modified") @PathVariable("id") UUID id,
+            @ApiParam(value = "Id of the document metadata of the document being modified") @PathVariable("metadataId")
+                    UUID metadataId,
             @Valid @RequestBody DocumentConsultationDataDto documentConsultationDataDto) {
-        documentService.addConsultationData(id, documentConsultationDataDto);
+        documentConfigurationService.addConsultationData(metadataId, documentConsultationDataDto);
         return ResponseEntity.ok().build();
     }
 
     @ApiOperation("Get consultation data of a document")
-    @GetMapping("{id}/consultation")
+    @GetMapping("{metadataId}/consultation")
     public ResponseEntity<DocumentConsultationDataDto> getConsultationData(
-            @ApiParam(value = "Id of the document") @PathVariable("id") UUID id) {
-        final DocumentConsultationDataDto consultationData = documentService.getConsultationData(id);
+            @ApiParam(value = "Id of the metadata of the document") @PathVariable("metadataId") UUID id) {
+        final DocumentConsultationDataDto consultationData = documentConfigurationService.getConsultationData(id);
         return ResponseEntity.ok(consultationData);
     }
 }

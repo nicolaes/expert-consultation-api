@@ -10,7 +10,7 @@ import java.util.Date;
 @Setter
 @AllArgsConstructor
 public class DocumentConsultationDataDto {
-    private Date startDate;
+    private Date consultationStartDate;
     private Date consultationDeadline;
     private Boolean excludedFromConsultation;
 }

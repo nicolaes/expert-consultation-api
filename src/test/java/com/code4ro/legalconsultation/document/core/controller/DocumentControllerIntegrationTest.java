@@ -8,6 +8,7 @@ import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.controller.AbstractControllerIntegrationTest;
 import com.code4ro.legalconsultation.core.factory.RandomObjectFiller;
 import com.code4ro.legalconsultation.document.configuration.model.persistence.DocumentConfiguration;
+import com.code4ro.legalconsultation.document.configuration.repository.DocumentConfigurationRepository;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsultationDataDto;
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.consolidated.repository.DocumentConsolidatedRepository;
@@ -37,8 +38,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 public class DocumentControllerIntegrationTest extends AbstractControllerIntegrationTest {
 
@@ -49,6 +55,8 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
     private DocumentMetadataRepository documentMetadataRepository;
     @Autowired
     private DocumentConsolidatedRepository documentConsolidatedRepository;
+    @Autowired
+    private DocumentConfigurationRepository documentConfigurationRepository;
     @Autowired
     private DocumentNodeRepository documentNodeRepository;
     @Autowired
@@ -524,7 +532,6 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
         final DocumentConsultationDataDto documentConsultationDataDto = new DocumentConsultationDataDto(
                 startDate, consultationDeadline, true);
 
-
         mvc.perform(
                 multipart("/api/documents/" + consolidated.getDocumentMetadata().getId().toString() + "/consultation")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -536,7 +543,7 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.startDate").isNotEmpty())
+                .andExpect(jsonPath("$.consultationStartDate").isNotEmpty())
                 .andExpect(jsonPath("$.consultationDeadline").isNotEmpty())
                 .andExpect(jsonPath("$.excludedFromConsultation").value(true));
     }
@@ -545,10 +552,13 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
     private DocumentConsolidated saveSingleConsolidated() {
         final DocumentNode documentNode = documentNodeFactory.save();
         final DocumentMetadata documentMetadata = RandomObjectFiller.createAndFill(DocumentMetadata.class);
-        final DocumentConfiguration documentConfiguration =
-                RandomObjectFiller.createAndFill(DocumentConfiguration.class);
         DocumentConsolidated consolidated =
-                new DocumentConsolidated(documentMetadata, documentNode, documentConfiguration);
-        return documentConsolidatedRepository.save(consolidated);
+                new DocumentConsolidated(documentMetadata, documentNode);
+        final DocumentConsolidated saved = documentConsolidatedRepository.save(consolidated);
+        final DocumentConfiguration documentConfiguration = new DocumentConfiguration(true, true);
+        documentConfiguration.setDocumentConsolidated(saved);
+        final DocumentConfiguration savedConfig = documentConfigurationRepository.save(documentConfiguration);
+        saved.setDocumentConfiguration(savedConfig);
+        return saved;
     }
 }

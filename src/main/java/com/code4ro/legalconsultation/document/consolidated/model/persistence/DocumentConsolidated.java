@@ -8,9 +8,15 @@ import com.code4ro.legalconsultation.user.model.persistence.User;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.List;
-import java.util.Date;
 
 @Entity
 @Table(name = "consolidated_document")
@@ -26,8 +32,10 @@ public class DocumentConsolidated extends BaseEntity {
     @JoinColumn(name = "document_node_id")
     private DocumentNode documentNode;
 
-    @OneToOne(fetch = FetchType.EAGER, optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "configuration_id")
+    @OneToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            mappedBy = "documentConsolidated")
     private DocumentConfiguration documentConfiguration;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -36,17 +44,6 @@ public class DocumentConsolidated extends BaseEntity {
             joinColumns = @JoinColumn(name = "document_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id"))
     private List<User> assignedUsers;
-
-    @Column(name = "start_date")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date startDate;
-
-    @Column(name = "consultation_deadline")
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date consultationDeadline;
-
-    @Column(name = "is_excluded_from_consultation")
-    private Boolean excludedFromConsultation;
 
     public DocumentConsolidated(final DocumentMetadata documentMetadata,
                                 final DocumentNode documentNode,
