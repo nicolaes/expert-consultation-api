@@ -82,6 +82,7 @@ public class DocumentControllerIntegrationTest extends AbstractControllerIntegra
         assertThat(documentMetadataRepository.count()).isEqualTo(1);
         assertThat(documentConsolidatedRepository.count()).isEqualTo(1);
         assertThat(documentNodeRepository.count()).isEqualTo(14);
+        assertThat(documentConfigurationRepository.count()).isEqualTo(1);
 
         final String soredFilePath = documentMetadataRepository.findAll().get(0).getFilePath();
         assertThatDocumentIsStored(soredFilePath);

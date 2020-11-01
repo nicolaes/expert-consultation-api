@@ -7,11 +7,8 @@ import com.code4ro.legalconsultation.document.consolidated.repository.DocumentCo
 import com.code4ro.legalconsultation.document.metadata.model.persistence.DocumentMetadata;
 import com.code4ro.legalconsultation.document.metadata.repository.DocumentMetadataRepository;
 import com.code4ro.legalconsultation.document.node.model.persistence.DocumentNode;
-import com.code4ro.legalconsultation.user.model.persistence.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 @Component
 public class DocumentFactory {
@@ -29,7 +26,11 @@ public class DocumentFactory {
 
         final DocumentConsolidated documentConsolidated = new DocumentConsolidated();
         documentConsolidated.setDocumentNode(rootNode);
-        documentConsolidated.setDocumentConfiguration(new DocumentConfiguration());
+
+        final DocumentConfiguration configuration = new DocumentConfiguration();
+        configuration.setDocumentConsolidated(documentConsolidated);
+        documentConsolidated.setDocumentConfiguration(configuration);
+
         documentConsolidated.setDocumentMetadata(metadata);
 
         return documentConsolidatedRepository.save(documentConsolidated);
