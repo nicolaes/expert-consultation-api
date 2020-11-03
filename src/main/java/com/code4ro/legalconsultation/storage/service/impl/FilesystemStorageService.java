@@ -39,11 +39,16 @@ public class FilesystemStorageService implements StorageApi {
     public String storeFile(final MultipartFile document) throws IOException, IllegalStateException {
         // add a random string to each file in order to avoid duplicates
         final String fileName = StorageApi.resolveUniqueName(document);
+
+        if(!storeDir.exists()){
+            log.error("The directory does not exist: {}", storeDir.getName());
+            throw new IOException("Directory does not exist");
+        }
         final Path filepath = Paths.get(storeDir.getAbsolutePath(), fileName);
         try {
             document.transferTo(filepath);
-        } catch(IOException | IllegalStateException exception) {
-            log.error("Error trasfering file to filesystem {}", document.getName(), exception);
+        } catch (IOException | IllegalStateException exception) {
+            log.error("Error transferring file to filesystem {}", document.getName(), exception);
             throw exception;
         }
         return filepath.toString();
