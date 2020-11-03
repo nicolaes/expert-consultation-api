@@ -30,17 +30,8 @@ public class FilesystemStorageService implements StorageApi {
         storeDir = new File(home, customStoreDirPath);
         if (!storeDir.exists()) {
             if(!storeDir.mkdir()){
-                log.error("Unable to create directory, could be a permission issue: {}", storeDir.getName());
-
-                try {
-                    ProcessBuilder pb =
-                            new ProcessBuilder("sudo", "mkdir", storeDir.getAbsolutePath());
-                    Process process = pb.start();
-                    process.waitFor();
-                } catch(IOException | InterruptedException exception){
-                    log.error("Unable to create directory: {}", storeDir.getAbsolutePath());
-                }
-
+                log.error("Unable to create directory, could be a permission issue: {}",
+                        storeDir.getName());
             }
         }
     }
@@ -49,21 +40,6 @@ public class FilesystemStorageService implements StorageApi {
     public String storeFile(final MultipartFile document) throws IOException, IllegalStateException {
         // add a random string to each file in order to avoid duplicates
         final String fileName = StorageApi.resolveUniqueName(document);
-
-        try {
-            if (!storeDir.exists()) {
-                log.error("The directory does not exist: {}", storeDir.getName());
-                ProcessBuilder pb =
-                        new ProcessBuilder("sudo", "mkdir", storeDir.getAbsolutePath());
-                Process process = pb.start();
-                int exitCode = process.waitFor();
-                log.debug("Process ended with exit status: {}", exitCode);
-            }
-        } catch(InterruptedException | IOException exception){
-            log.error("Error creating directory: {}", storeDir.getAbsolutePath());
-            throw new IOException("The directory can not be created");
-        }
-
         final Path filepath = Paths.get(storeDir.getAbsolutePath(), fileName);
         try {
             document.transferTo(filepath);

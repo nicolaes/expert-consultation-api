@@ -1,5 +1,6 @@
 package com.code4ro.legalconsultation.document.core.controller;
 
+import com.code4ro.legalconsultation.core.exception.LegalValidationException;
 import com.code4ro.legalconsultation.core.model.dto.PageDto;
 import com.code4ro.legalconsultation.document.configuration.service.DocumentConfigurationService;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
@@ -133,7 +134,18 @@ public class DocumentController {
     public ResponseEntity<PdfHandleDto> uploadPdf(@ApiParam(value = "Id of the document") @PathVariable UUID id,
                                                   @ApiParam(value = "State of the pdf document") @RequestParam String state,
                                                   @ApiParam(value = "The pdf document") @RequestBody MultipartFile file) {
-        return ResponseEntity.ok(documentService.addPdf(id, state, file));
+        try {
+            PdfHandleDto pdfHandleDto = documentService.addPdf(id, state, file);
+
+            return ResponseEntity.ok(pdfHandleDto);
+        } catch(LegalValidationException ex){
+            if(ex.getI18nKey().equals("document.pdf.upload.failed"))
+                return ResponseEntity
+                        .ok()
+                        .build();
+
+            throw ex;
+        }
     }
 
     @ApiOperation(value = "Generate a PDF file from this document",
