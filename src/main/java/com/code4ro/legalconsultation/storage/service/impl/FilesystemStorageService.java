@@ -1,6 +1,7 @@
 package com.code4ro.legalconsultation.storage.service.impl;
 
 import com.code4ro.legalconsultation.storage.service.StorageApi;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+@Slf4j
 @Service
 @Profile("dev")
 public class FilesystemStorageService implements StorageApi {
@@ -27,16 +29,23 @@ public class FilesystemStorageService implements StorageApi {
         final String home = System.getProperty("user.home");
         storeDir = new File(home, customStoreDirPath);
         if (!storeDir.exists()) {
-            storeDir.mkdir();
+            if(!storeDir.mkdir()){
+                log.error("Unable to create directory: {}", storeDir.getName());
+            }
         }
     }
 
     @Override
-    public String storeFile(final MultipartFile document) throws IOException {
-        // add a random string to each file in roder to avoid duplicates
+    public String storeFile(final MultipartFile document) throws IOException, IllegalStateException {
+        // add a random string to each file in order to avoid duplicates
         final String fileName = StorageApi.resolveUniqueName(document);
         final Path filepath = Paths.get(storeDir.getAbsolutePath(), fileName);
-        document.transferTo(filepath);
+        try {
+            document.transferTo(filepath);
+        } catch(IOException | IllegalStateException exception) {
+            log.error("Error trasfering file to filesystem {}", document.getName(), exception);
+            throw exception;
+        }
         return filepath.toString();
     }
 
