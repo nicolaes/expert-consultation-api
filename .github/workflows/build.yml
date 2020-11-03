@@ -21,8 +21,7 @@ jobs:
         java-version: 1.11
 
     - name: Build with Maven
-      # add skipTests flag for now, as we cannot figure out why some tests fail randomly
-      run: mvn package -DskipTests
+      run: mvn package
 
     - name: Build the Docker image
       if: github.ref == 'refs/heads/develop'
