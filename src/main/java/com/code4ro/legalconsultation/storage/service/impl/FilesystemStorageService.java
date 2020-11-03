@@ -30,7 +30,17 @@ public class FilesystemStorageService implements StorageApi {
         storeDir = new File(home, customStoreDirPath);
         if (!storeDir.exists()) {
             if(!storeDir.mkdir()){
-                log.error("Unable to create directory: {}", storeDir.getName());
+                log.error("Unable to create directory, could be a permission issue: {}", storeDir.getName());
+
+                try {
+                    ProcessBuilder pb =
+                            new ProcessBuilder("sudo", "mkdir", storeDir.getAbsolutePath());
+                    Process process = pb.start();
+                    process.waitFor();
+                } catch(IOException | InterruptedException exception){
+                    log.error("Unable to create directory: {}", storeDir.getAbsolutePath());
+                }
+
             }
         }
     }
