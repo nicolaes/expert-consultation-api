@@ -47,6 +47,29 @@ public class CommentsControllerTest extends AbstractControllerIntegrationTest {
     @Test
     @WithMockUser
     @Transactional
+    public void findAllPendingCommentsWithNodeAndDocumentData() throws Exception {
+        persistCurrentUser(UserRole.ADMIN);
+
+        final DocumentConsolidated document1 = documentFactory.create();
+        document1.getDocumentNode().setTitle("NODETITLE");
+        document1.getDocumentNode().setContent("NODECONTENT");
+
+        commentService.create(document1.getDocumentNode().getId(), commentFactory.create());
+
+        mvc.perform(get(endpoint("/api/comments/pending?page=0&size=10"))
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content[0].documentTitle")
+                        .value(document1.getDocumentMetadata().getDocumentTitle()))
+                .andExpect(jsonPath("$.content[0].nodeTitle")
+                        .value(document1.getDocumentNode().getTitle()))
+                .andExpect(jsonPath("$.content[0].nodeContent")
+                        .value(document1.getDocumentNode().getContent()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @WithMockUser
+    @Transactional
     public void findAllPendingWithAdminUser() throws Exception {
         persistCurrentUser(UserRole.ADMIN);
 

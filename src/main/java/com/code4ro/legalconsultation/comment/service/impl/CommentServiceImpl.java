@@ -9,6 +9,7 @@ import com.code4ro.legalconsultation.comment.model.persistence.CommentStatus;
 import com.code4ro.legalconsultation.comment.repository.CommentRepository;
 import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.exception.LegalValidationException;
+import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
 import com.code4ro.legalconsultation.document.core.service.DocumentService;
 import com.code4ro.legalconsultation.document.node.model.persistence.DocumentNode;
 import com.code4ro.legalconsultation.document.node.service.DocumentNodeService;

@@ -7,14 +7,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CommentDocumentDataMapper.class})
 public interface CommentMapper {
     CommentDto map(Comment comment);
 
     Comment map(CommentDto commentDto);
 
-    @Mappings({
-            @Mapping(target = "user", source = "comment.owner.name")
+    @Mappings( {
+            @Mapping(target = "user", source = "comment.owner.name"),
     })
     CommentDetailDto mapToCommentDetailDto(Comment comment);
 }

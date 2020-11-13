@@ -1,5 +1,6 @@
 package com.code4ro.legalconsultation.document.core.service;
 
+import com.code4ro.legalconsultation.comment.model.persistence.Comment;
 import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.export.model.DocumentExportFormat;
@@ -12,6 +13,7 @@ import com.code4ro.legalconsultation.user.model.persistence.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -56,4 +58,6 @@ public interface DocumentService {
     byte[] export(final UUID id, final DocumentExportFormat type);
 
     List<UUID> getAllAssignedDocumentsNodeIds(User user);
+
+    DocumentConsolidatedDto getDocumentConsolidatedForComment(Comment comment);
 }

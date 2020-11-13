@@ -1,5 +1,6 @@
 package com.code4ro.legalconsultation.document.core.service.impl;
 
+import com.code4ro.legalconsultation.comment.model.persistence.Comment;
 import com.code4ro.legalconsultation.document.configuration.model.persistence.DocumentConfiguration;
 import com.code4ro.legalconsultation.document.configuration.service.DocumentConfigurationService;
 import com.code4ro.legalconsultation.document.consolidated.mapper.DocumentConsolidatedMapper;
@@ -198,5 +199,12 @@ public class DocumentServiceImpl implements DocumentService {
                 .flatMap(document -> document.getDocumentNode().flattened())
                 .map(DocumentNode::getId)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DocumentConsolidatedDto getDocumentConsolidatedForComment(Comment comment) {
+        final DocumentNode rootNode = documentNodeService.findRootNodeForId(comment.getDocumentNode().getId());
+        return fetchConsolidatedByDocumentNodeId(rootNode.getId());
     }
 }

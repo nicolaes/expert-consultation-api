@@ -7,6 +7,8 @@ import com.code4ro.legalconsultation.comment.model.persistence.Comment;
 import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.controller.AbstractControllerIntegrationTest;
 import com.code4ro.legalconsultation.comment.factory.CommentFactory;
+import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
+import com.code4ro.legalconsultation.document.node.factory.DocumentFactory;
 import com.code4ro.legalconsultation.document.node.factory.DocumentNodeFactory;
 import com.code4ro.legalconsultation.authentication.model.persistence.ApplicationUser;
 import com.code4ro.legalconsultation.document.node.model.persistence.DocumentNode;
@@ -41,6 +43,8 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @Autowired
     private DocumentNodeFactory documentNodeFactory;
     @Autowired
+    private DocumentFactory documentFactory;
+    @Autowired
     private CurrentUserService currentUserService;
 
     @Before
@@ -52,10 +56,10 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void create() throws Exception {
-        final DocumentNode node = documentNodeFactory.save();
+        final DocumentConsolidated document = documentFactory.create();
         final CommentDto commentDto = commentFactory.create();
 
-        mvc.perform(post(endpoint("/api/documentnodes/", node.getId(), "/comments"))
+        mvc.perform(post(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(commentDto))
                 .accept(MediaType.APPLICATION_JSON))
@@ -69,12 +73,12 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void update() throws Exception {
-        final DocumentNode node = documentNodeFactory.save();
+        final DocumentConsolidated document = documentFactory.create();
         final CommentDto commentDto = commentFactory.create();
         final ApplicationUser currentUser = currentUserService.getCurrentUser();
 
         Comment comment = commentFactory.createEntity();
-        comment.setDocumentNode(node);
+        comment.setDocumentNode(document.getDocumentNode());
         comment.setOwner(currentUser);
         comment.setLastEditDateTime(new Date());
         comment = commentRepository.save(comment);
@@ -82,7 +86,7 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
         final String newText = "new text";
         commentDto.setText(newText);
 
-        mvc.perform(put(endpoint("/api/documentnodes/", node.getId(), "/comments/", comment.getId()))
+        mvc.perform(put(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments/", comment.getId()))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(commentDto))
                 .accept(MediaType.APPLICATION_JSON))
@@ -119,16 +123,16 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void findAll() throws Exception {
-        final DocumentNode node = documentNodeFactory.save();
-        final CommentDetailDto comment1 = commentService.create(node.getId(), commentFactory.create());
-        final CommentDetailDto comment2 = commentService.create(node.getId(), commentFactory.create());
-        final CommentDetailDto comment3 = commentService.create(node.getId(), commentFactory.create());
+        final DocumentConsolidated document = documentFactory.create();
+        final CommentDetailDto comment1 = commentService.create(document.getDocumentNode().getId(), commentFactory.create());
+        final CommentDetailDto comment2 = commentService.create(document.getDocumentNode().getId(), commentFactory.create());
+        final CommentDetailDto comment3 = commentService.create(document.getDocumentNode().getId(), commentFactory.create());
 
         commentService.setStatus(comment1.getId(), APPROVED);
         commentService.setStatus(comment2.getId(), APPROVED);
         commentService.setStatus(comment3.getId(), APPROVED);
 
-        mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments?page=0"))
+        mvc.perform(get(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments?page=0"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(jsonPath("$.totalPages").value(2))
@@ -137,7 +141,7 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
                 .andExpect(jsonPath("$.pageable.pageNumber").value(0))
                 .andExpect(status().isOk());
 
-        mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments?page=1"))
+        mvc.perform(get(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments?page=1"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.size()").value(1))
                 .andExpect(jsonPath("$.totalPages").value(2))
@@ -151,8 +155,8 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void approve() throws Exception {
-        final DocumentNode node = documentNodeFactory.save();
-        CommentDetailDto comment = commentService.create(node.getId(), commentFactory.create());
+        final DocumentConsolidated document = documentFactory.create();
+        CommentDetailDto comment = commentService.create(document.getDocumentNode().getId(), commentFactory.create());
         mvc.perform(get(endpoint("/api/comments/", comment.getId(), "/approve"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(APPROVED.toString()))
@@ -163,8 +167,8 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void reject() throws Exception {
-        final DocumentNode node = documentNodeFactory.save();
-        CommentDetailDto comment = commentService.create(node.getId(), commentFactory.create());
+        final DocumentConsolidated document = documentFactory.create();
+        CommentDetailDto comment = commentService.create(document.getDocumentNode().getId(), commentFactory.create());
         mvc.perform(get(endpoint("/api/comments/", comment.getId(), "/reject"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.status").value(REJECTED.toString()))
@@ -175,19 +179,19 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void findAllReplies() throws Exception {
-        DocumentNode node = documentNodeFactory.save();
-        Comment comment = createComment(node);
+        final DocumentConsolidated document = documentFactory.create();
+        Comment comment = createComment(document.getDocumentNode());
 
         commentService.createReply(comment.getId(), commentFactory.create());
         commentService.createReply(comment.getId(), commentFactory.create());
         commentService.createReply(comment.getId(), commentFactory.create());
 
-        mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments", comment.getId(), "/replies?page=0"))
+        mvc.perform(get(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments", comment.getId(), "/replies?page=0"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.size()").value(2))
                 .andExpect(status().isOk());
 
-        mvc.perform(get(endpoint("/api/documentnodes/", node.getId(), "/comments", comment.getId(), "/replies?page=1"))
+        mvc.perform(get(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments", comment.getId(), "/replies?page=1"))
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content.size()").value(1))
                 .andExpect(jsonPath("$.content[0].id").isNotEmpty())
@@ -199,13 +203,13 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @WithMockUser
     @Transactional
     public void createReply() throws Exception {
-        DocumentNode node = documentNodeFactory.save();
-        Comment comment = createComment(node);
+        DocumentConsolidated document = documentFactory.create();
+        Comment comment = createComment(document.getDocumentNode());
         CommentDto commentDto = commentFactory.create();
 
         assertThat(commentRepository.count()).isEqualTo(1);
 
-        mvc.perform(post(endpoint("/api/documentnodes/", node.getId(), "/comments/", comment.getId(), "/replies"))
+        mvc.perform(post(endpoint("/api/documentnodes/", document.getDocumentNode().getId(), "/comments/", comment.getId(), "/replies"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(commentDto))
                 .accept(MediaType.APPLICATION_JSON))

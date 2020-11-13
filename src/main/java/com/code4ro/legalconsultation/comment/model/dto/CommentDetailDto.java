@@ -7,4 +7,7 @@ import lombok.Setter;
 @Setter
 public class CommentDetailDto extends CommentDto {
     private String user;
+    private String documentTitle;
+    private String nodeTitle;
+    private String nodeContent;
 }
