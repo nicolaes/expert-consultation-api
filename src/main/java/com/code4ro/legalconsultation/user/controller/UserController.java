@@ -8,6 +8,7 @@ import com.code4ro.legalconsultation.security.service.CurrentUserService;
 import com.code4ro.legalconsultation.user.mapper.UserMapper;
 import com.code4ro.legalconsultation.user.model.dto.UserDto;
 import com.code4ro.legalconsultation.user.model.persistence.User;
+import com.code4ro.legalconsultation.user.model.persistence.UserSpecialization;
 import com.code4ro.legalconsultation.user.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -47,7 +49,8 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping(value = "/bulk")
     public List<UserDto> saveAll(
-            @ApiParam("List of DTO objects containing new users information") @Valid @RequestBody final List<UserDto> userDtos) {
+            @ApiParam("List of DTO objects containing new users information") @Valid @RequestBody
+            final List<UserDto> userDtos) {
         return userService.saveAndSendRegistrationMail(userDtos);
     }
 
@@ -84,7 +87,8 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping(value = "/extract", consumes = "multipart/form-data")
     public List<UserDto> extractFromCsv(
-            @ApiParam("CSV file containing user information that is being uploaded") @RequestParam("file") final MultipartFile file) {
+            @ApiParam("CSV file containing user information that is being uploaded") @RequestParam("file")
+            final MultipartFile file) {
         return userService.extractFromCsv(file);
     }
 
@@ -115,5 +119,13 @@ public class UserController {
     public CurrentUserDto currentUser() {
         final ApplicationUser currentUser = currentUserService.getCurrentUser();
         return currentUser != null ? currentUserMapper.map(currentUser) : null;
+    }
+
+    @ApiOperation(value = "Return the possible values for a user specialization",
+            response = UserSpecialization.class,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/specializations")
+    public List<UserSpecialization> getUserSpecializations() {
+        return Arrays.asList(UserSpecialization.values());
     }
 }
