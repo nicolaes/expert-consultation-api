@@ -19,7 +19,7 @@ public class SwaggerConfiguration {
     public Docket swaggerConfig(){
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.code4ro.legalconsultation.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.code4ro.legalconsultation"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());

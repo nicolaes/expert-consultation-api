@@ -77,6 +77,11 @@ public class ApplicationUserService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public long count() {
+        return applicationUserRepository.count();
+    }
+
     private User getUser(final String email) {
         final Optional<User> byEmail = userService.findByEmail(email);
 
