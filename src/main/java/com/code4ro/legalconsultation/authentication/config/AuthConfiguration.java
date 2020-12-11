@@ -18,32 +18,32 @@ import org.springframework.transaction.annotation.Transactional;
 @Configuration
 @Slf4j
 public class AuthConfiguration {
+    public static final String ADMIN_EMAIL = "admin@example.com";
+    public static final String ADMIN_USERNAME = "admin";
+    public static final String ADMIN_PASSWORD = "admin";
+
     @Transactional
     @Autowired
     void initializeAdminUser(ApplicationUserService applicationUserService, UserService userService,
                              InvitationService invitationService) {
-        String email = "admin@example.com";
-        String username = "admin";
-        String password = "admin";
-
-        if (applicationUserService.count() > 0 || userService.findByEmail(email).isPresent()) {
+        if (applicationUserService.count() > 0 || userService.findByEmail(ADMIN_EMAIL).isPresent()) {
             log.info("Admin user NOT created for local development due to existing users or duplicate email.");
             return;
         }
 
-        User user = new User(email, UserRole.OWNER);
+        User user = new User(ADMIN_EMAIL, UserRole.OWNER);
         user.setSpecialization(UserSpecialization.ARCHITECT);
         final User savedUser = userService.saveEntity(user);
 
         Invitation invitation = invitationService.create(savedUser);
 
         SignUpRequest signUpRequest = new SignUpRequest();
-        signUpRequest.setName(username);
-        signUpRequest.setUsername(username);
+        signUpRequest.setName(ADMIN_USERNAME);
+        signUpRequest.setUsername(ADMIN_USERNAME);
         signUpRequest.setEmail(savedUser.getEmail());
-        signUpRequest.setPassword(password);
+        signUpRequest.setPassword(ADMIN_PASSWORD);
         signUpRequest.setInvitationCode(invitation.getCode());
         applicationUserService.save(signUpRequest);
-        log.info("Created user '{}' with password '{}' for local development.", username, password);
+        log.info("Created user '{}' with password '{}' for local development.", ADMIN_USERNAME, ADMIN_PASSWORD);
     }
 }
