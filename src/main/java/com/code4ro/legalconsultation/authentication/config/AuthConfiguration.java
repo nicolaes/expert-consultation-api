@@ -33,7 +33,7 @@ public class AuthConfiguration {
 
         User user = new User(ADMIN_EMAIL, UserRole.OWNER);
         user.setSpecialization(UserSpecialization.ARCHITECT);
-        final User savedUser = userService.saveEntity(user);
+        User savedUser = userService.saveEntity(user);
 
         Invitation invitation = invitationService.create(savedUser);
 
