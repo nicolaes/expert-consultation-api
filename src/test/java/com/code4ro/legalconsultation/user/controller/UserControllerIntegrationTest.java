@@ -1,5 +1,6 @@
 package com.code4ro.legalconsultation.user.controller;
 
+import com.code4ro.legalconsultation.authentication.repository.ApplicationUserRepository;
 import com.code4ro.legalconsultation.core.controller.AbstractControllerIntegrationTest;
 import com.code4ro.legalconsultation.invitation.repository.InvitationRepository;
 import com.code4ro.legalconsultation.user.model.dto.UserDto;
@@ -39,8 +40,12 @@ public class UserControllerIntegrationTest extends AbstractControllerIntegration
     @Autowired
     private InvitationRepository invitationRepository;
 
+    @Autowired
+    private ApplicationUserRepository applicationUserRepository;
+
     @Before
     public void before() {
+        applicationUserRepository.deleteAll();
         invitationRepository.deleteAll();
         userRepository.deleteAll();
         when(mailSender.createMimeMessage()).thenReturn(mock(MimeMessage.class));
@@ -57,6 +62,7 @@ public class UserControllerIntegrationTest extends AbstractControllerIntegration
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDto))
                 .accept(MediaType.APPLICATION_JSON))
+                .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$.firstName").value(userDto.getFirstName()))
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.role").value(userDto.getRole().toString()))
