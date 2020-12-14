@@ -76,6 +76,12 @@ mysql
 
 #### [With docker-compose](etc/docker/README.md)
 
+### Local testing
+
+* Import the [swagger API docs](http://localhost:8080/v2/api-docs) in Postman or an API testing tool _(optional)_
+* Get a JWT from `/api/auth/signin` with the default user `admin` / `admin`
+* Make requests using `Authorization: Bearer <token>` header
+
 ## Feedback
 
 * Request a new feature on GitHub.

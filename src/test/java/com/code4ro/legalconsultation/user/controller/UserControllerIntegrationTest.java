@@ -62,7 +62,6 @@ public class UserControllerIntegrationTest extends AbstractControllerIntegration
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userDto))
                 .accept(MediaType.APPLICATION_JSON))
-                .andDo(mvcResult -> System.out.println(mvcResult.getResponse().getContentAsString()))
                 .andExpect(jsonPath("$.firstName").value(userDto.getFirstName()))
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.role").value(userDto.getRole().toString()))
