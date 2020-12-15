@@ -89,7 +89,7 @@ public class DocumentServiceTest {
         when(documentConsolidatedService.getByDocumentMetadataId(any(UUID.class))).thenReturn(document);
         when(documentConsolidatedMapper.map(any())).thenReturn(new DocumentConsolidatedDto());
 
-        documentService.fetchConsolidatedByMetadataId(uuid);
+        documentService.fetchConsolidatedDtoByMetadataId(uuid);
 
         verify(documentConsolidatedService).getByDocumentMetadataId(uuid);
     }

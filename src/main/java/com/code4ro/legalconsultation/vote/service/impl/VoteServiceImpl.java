@@ -36,14 +36,14 @@ public class VoteServiceImpl implements VoteService {
             return new HashSet<>();
         }
 
-        List<Vote> documentVotes = this.voteRepository.findByCommentId(commentId);
+        List<Vote> documentVotes = this.voteRepository.findAllByCommentId(commentId);
         if (CollectionUtils.isEmpty(documentVotes)) {
             return new HashSet<>();
         }
 
         return documentVotes
                 .parallelStream()
-                .map(vote -> new VoteDto(vote.getComment().getId(), vote.getVote()))
+                .map(vote -> new VoteDto(vote.getId(), vote.getComment().getId(), vote.getVote()))
                 .collect(toSet());
     }
 

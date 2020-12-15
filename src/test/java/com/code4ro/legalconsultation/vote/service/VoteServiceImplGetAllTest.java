@@ -9,6 +9,9 @@ import com.code4ro.legalconsultation.vote.repository.VoteRepository;
 import com.code4ro.legalconsultation.vote.model.persistence.Vote;
 import com.code4ro.legalconsultation.vote.model.persistence.VoteType;
 import com.code4ro.legalconsultation.vote.service.impl.VoteServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +57,7 @@ public class VoteServiceImplGetAllTest {
     public void getAnonymousVotes_expectedSingleVoteUp() {
         List<Vote> voteEntities = new ArrayList<>();
         voteEntities.add(createVoteEntity(new ApplicationUser(), UP, uuidComment));
-        when(this.voteRepository.findByCommentId(uuidComment)).thenReturn(voteEntities);
+        when(this.voteRepository.findAllByCommentId(uuidComment)).thenReturn(voteEntities);
 
         Set<VoteDto> actualVotes = voteService.getAnonymousVotesForComment(uuidComment);
 
@@ -67,26 +70,31 @@ public class VoteServiceImplGetAllTest {
     }
 
     @Test
-    public void getAnonymousVotes_expectedSingleVoteDown() {
+    public void getAnonymousVotes_expected2VotesDown1VoteUp() throws JsonProcessingException {
         List<Vote> voteEntities = new ArrayList<>();
         voteEntities.add(createVoteEntity(new ApplicationUser(), DOWN, uuidComment));
-        when(this.voteRepository.findByCommentId(uuidComment)).thenReturn(voteEntities);
+        voteEntities.add(createVoteEntity(new ApplicationUser(), DOWN, uuidComment));
+        voteEntities.add(createVoteEntity(new ApplicationUser(), UP, uuidComment));
+        when(this.voteRepository.findAllByCommentId(uuidComment)).thenReturn(voteEntities);
 
         Set<VoteDto> actualVotes = voteService.getAnonymousVotesForComment(uuidComment);
 
         assertFalse(actualVotes.isEmpty());
-        assertEquals(1, actualVotes.size());
+        assertEquals(3, actualVotes.size());
+        assertEquals(-1,
+                (int) actualVotes.stream().map(voteDto -> voteDto.getVote().getScore()).reduce(0, Integer::sum));
 
-        VoteDto voteDto = actualVotes.iterator().next();
-        assertEquals(DOWN, voteDto.getVote());
-        assertEquals(uuidComment, voteDto.getCommentId());
+        assertEquals(uuidComment, actualVotes.iterator().next().getCommentId());
+        Assertions.assertThat(new ObjectMapper().writeValueAsString(actualVotes))
+                .contains("\"commentId\":")
+                .doesNotContain("\"id\":");
     }
 
     @Test
     public void getAnonymousVotes_expectedSingleVoteOfCurrentUserUp() {
         List<Vote> voteEntities = new ArrayList<>();
         voteEntities.add(createVoteEntity(currentUser, UP, uuidComment));
-        when(this.voteRepository.findByCommentId(uuidComment)).thenReturn(voteEntities);
+        when(this.voteRepository.findAllByCommentId(uuidComment)).thenReturn(voteEntities);
 
         Set<VoteDto> actualVotes = voteService.getAnonymousVotesForComment(uuidComment);
 
@@ -100,6 +108,7 @@ public class VoteServiceImplGetAllTest {
 
     private Vote createVoteEntity(ApplicationUser appUser, VoteType vote, UUID commentId) {
         Vote entity = new Vote();
+        entity.setId(randomUUID());
         entity.setVote(vote);
         Comment comment = new Comment();
         comment.setId(commentId);

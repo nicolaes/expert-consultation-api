@@ -14,7 +14,10 @@ public interface CommentMapper {
     Comment map(CommentDto commentDto);
 
     @Mappings( {
-            @Mapping(target = "user", source = "comment.owner.name"),
+            @Mapping(target = "documentTitle", ignore = true),
+            @Mapping(target = "nodeTitle", ignore = true),
+            @Mapping(target = "nodeContent", ignore = true),
+            @Mapping(source = "comment.owner.name", target = "user"),
     })
     CommentDetailDto mapToCommentDetailDto(Comment comment);
 }

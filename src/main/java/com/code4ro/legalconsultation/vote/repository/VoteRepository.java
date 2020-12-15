@@ -11,5 +11,5 @@ import java.util.UUID;
 public interface VoteRepository extends JpaRepository<Vote, UUID> {
     Vote findByCommentIdAndOwnerId(final UUID commentId, final UUID ownerId);
 
-    List<Vote> findByCommentId(final UUID commentId);
+    List<Vote> findAllByCommentId(final UUID commentId);
 }

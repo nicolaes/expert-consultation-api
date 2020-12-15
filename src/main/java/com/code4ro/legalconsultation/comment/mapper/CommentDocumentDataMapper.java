@@ -2,7 +2,7 @@ package com.code4ro.legalconsultation.comment.mapper;
 
 import com.code4ro.legalconsultation.comment.model.dto.CommentDetailDto;
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
-import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
+import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.core.service.DocumentService;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -25,8 +25,7 @@ public abstract class CommentDocumentDataMapper {
                 nodeContent.substring(0, min(DOCUMENT_CONTENT_IN_COMMENT_LENGTH, nodeContent.length())) : "");
         dto.setNodeTitle(entity.getDocumentNode().getTitle() != null ? entity.getDocumentNode().getTitle() : "");
 
-        final DocumentConsolidatedDto documentConsolidated =
-                documentService.getDocumentConsolidatedForComment(entity);
+        final DocumentConsolidated documentConsolidated = documentService.getDocumentConsolidatedForComment(entity);
         dto.setDocumentTitle(documentConsolidated.getDocumentMetadata().getDocumentTitle());
     }
 }
