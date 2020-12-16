@@ -13,12 +13,14 @@ import com.code4ro.legalconsultation.authentication.model.persistence.Applicatio
 import com.code4ro.legalconsultation.document.node.model.persistence.DocumentNode;
 import com.code4ro.legalconsultation.comment.repository.CommentRepository;
 import com.code4ro.legalconsultation.security.service.CurrentUserService;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.test.context.transaction.AfterTransaction;
+import org.springframework.test.context.transaction.BeforeTransaction;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -46,9 +48,19 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     @Autowired
     private CurrentUserService currentUserService;
 
-    @Before
-    public void before() {
-        persistMockedUser();
+    /**
+     * Create user after constructor to be used by @WithUserDetails
+     * - "@Before" annotation happens too late - see https://stackoverflow.com/a/38282258/1814524
+     * - Fixed when migrating to spring-security 5.4.0 - https://github.com/spring-projects/spring-security/issues/6591
+     */
+    @BeforeTransaction
+    public void setUp() {
+        wrapInTransaction(this::persistMockedUser);
+    }
+
+    @AfterTransaction
+    public void tearDown() {
+        wrapInTransaction(this::removeMockUser);
     }
 
     @Test
@@ -119,7 +131,7 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     }
 
     @Test
-    @WithMockUser
+    @WithUserDetails
     @Transactional
     public void findAll() throws Exception {
         final DocumentConsolidated document = documentFactory.create();

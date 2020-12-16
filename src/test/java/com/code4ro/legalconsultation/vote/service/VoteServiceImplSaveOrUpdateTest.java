@@ -1,7 +1,7 @@
 package com.code4ro.legalconsultation.vote.service;
 
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
-import com.code4ro.legalconsultation.comment.service.CommentService;
+import com.code4ro.legalconsultation.comment.repository.CommentRepository;
 import com.code4ro.legalconsultation.comment.factory.CommentFactory;
 import com.code4ro.legalconsultation.core.factory.RandomObjectFiller;
 import com.code4ro.legalconsultation.security.service.CurrentUserService;
@@ -37,7 +37,7 @@ public class VoteServiceImplSaveOrUpdateTest {
     @Mock
     private CurrentUserService currentUserService;
     @Mock
-    private CommentService commentService;
+    private CommentRepository commentRepository;
     @InjectMocks
     private VoteServiceImpl voteService;
     @Captor
@@ -54,7 +54,7 @@ public class VoteServiceImplSaveOrUpdateTest {
 
         when(currentUserService.getCurrentApplicationUser()).thenReturn(currentUser);
         comment = commentFactory.createEntity();
-        when(commentService.findById(any())).thenReturn(comment);
+        when(commentRepository.getOne(any())).thenReturn(comment);
         id = UUID.randomUUID();
 
         alreadyExistingVote = new Vote();
