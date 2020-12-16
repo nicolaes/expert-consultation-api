@@ -77,9 +77,9 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public VoteType getVoteForComment(UUID commentId) {
+    public VoteDto getVoteForComment(UUID commentId) {
         final CurrentUser currentUser = currentUserService.getCurrentUser();
-        return voteRepository.findVoteByOwnerIdAndCommentId(currentUser.getId(), commentId);
+        return voteRepository.findVoteByOwnerIdAndCommentId(currentUser.getId(), commentId).orElse(null);
     }
 
     @Override

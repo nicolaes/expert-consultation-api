@@ -1,7 +1,6 @@
 package com.code4ro.legalconsultation.vote.model.dto;
 
 import com.code4ro.legalconsultation.vote.model.persistence.VoteType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,7 +23,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"id", "commentId"})
 public class VoteDto {
-    @JsonIgnore private UUID id;
+    private UUID id;
     private UUID commentId;
     private VoteType vote;
 

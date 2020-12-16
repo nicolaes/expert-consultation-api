@@ -12,7 +12,7 @@ public interface VoteService {
 
     Set<VoteDto> getAnonymousVotesForComment(UUID commentId);
 
-    VoteType getVoteForComment(UUID commentId);
+    VoteDto getVoteForComment(UUID commentId);
 
     Map<VoteType, Long> getVoteCountForComment(UUID commentId);
 }
