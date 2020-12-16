@@ -1,6 +1,5 @@
 package com.code4ro.legalconsultation.comment.controller;
 
-import com.code4ro.legalconsultation.authentication.service.ApplicationUserService;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDetailDto;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDto;
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
@@ -75,7 +74,7 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     public void update() throws Exception {
         final DocumentConsolidated document = documentFactory.create();
         final CommentDto commentDto = commentFactory.create();
-        final ApplicationUser currentUser = currentUserService.getCurrentUser();
+        final ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
 
         Comment comment = commentFactory.createEntity();
         comment.setDocumentNode(document.getDocumentNode());
@@ -102,7 +101,7 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     public void deleteComment() throws Exception {
         final DocumentNode node = documentNodeFactory.save();
         final CommentDto commentDto = commentFactory.create();
-        final ApplicationUser currentUser = currentUserService.getCurrentUser();
+        final ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
 
         Comment comment = commentFactory.createEntity();
         comment.setDocumentNode(node);
@@ -222,7 +221,7 @@ public class DocumentCommentsControllerIntegrationTest extends AbstractControlle
     private Comment createComment(DocumentNode node) {
         Comment comment = commentFactory.createEntity();
         comment.setDocumentNode(node);
-        comment.setOwner(currentUserService.getCurrentUser());
+        comment.setOwner(currentUserService.getCurrentApplicationUser());
         comment.setLastEditDateTime(new Date());
         return commentRepository.save(comment);
     }

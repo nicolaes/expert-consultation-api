@@ -9,7 +9,6 @@ import com.code4ro.legalconsultation.comment.model.persistence.CommentStatus;
 import com.code4ro.legalconsultation.comment.repository.CommentRepository;
 import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.exception.LegalValidationException;
-import com.code4ro.legalconsultation.document.consolidated.model.dto.DocumentConsolidatedDto;
 import com.code4ro.legalconsultation.document.core.service.DocumentService;
 import com.code4ro.legalconsultation.document.node.model.persistence.DocumentNode;
 import com.code4ro.legalconsultation.document.node.service.DocumentNodeService;
@@ -65,7 +64,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDetailDto create(UUID nodeId, final CommentDto commentDto) {
         final DocumentNode node = documentNodeService.findById(nodeId);
 
-        final ApplicationUser currentUser = currentUserService.getCurrentUser();
+        final ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
 
         Comment comment = mapperService.map(commentDto);
         comment.setDocumentNode(node);
@@ -81,7 +80,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDetailDto createReply(UUID parentId, CommentDto commentDto) {
         Comment parent = commentRepository.findById(parentId).orElseThrow(EntityNotFoundException::new);
-        ApplicationUser currentUser = currentUserService.getCurrentUser();
+        ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
 
         Comment reply = mapperService.map(commentDto);
         reply.setParent(parent);
@@ -147,7 +146,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional(readOnly = true)
     public Page<Comment> findAllPending(final Pageable pageable) {
-        final ApplicationUser currentUser = currentUserService.getCurrentUser();
+        final ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
         if (isOwner(currentUser) || isAdmin(currentUser)) {
             return getAllPendingComments(pageable);
         } else {
@@ -166,7 +165,7 @@ public class CommentServiceImpl implements CommentService {
 
     private void checkIfAuthorized(Comment comment) {
         final ApplicationUser owner = comment.getOwner();
-        final ApplicationUser currentUser = currentUserService.getCurrentUser();
+        final ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
         if (currentUser.getUser().getRole() != UserRole.ADMIN && !Objects.equals(currentUser.getId(), owner.getId())) {
             throw LegalValidationException.builder()
                     .i18nKey("comment.Unauthorized.user")

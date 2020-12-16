@@ -50,7 +50,7 @@ public class VoteServiceImplGetAllTest {
     public void before() {
         currentUser.getUser().setRole(ADMIN);
         currentUser.setId(randomUUID());
-        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(currentUser);
     }
 
     @Test

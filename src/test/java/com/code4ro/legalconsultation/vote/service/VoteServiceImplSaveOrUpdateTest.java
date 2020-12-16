@@ -52,7 +52,7 @@ public class VoteServiceImplSaveOrUpdateTest {
         currentUser = RandomObjectFiller.createAndFill(ApplicationUser.class);
         currentUser.getUser().setRole(ADMIN);
 
-        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(currentUser);
         comment = commentFactory.createEntity();
         when(commentService.findById(any())).thenReturn(comment);
         id = UUID.randomUUID();

@@ -1,9 +1,11 @@
 package com.code4ro.legalconsultation.comment.mapper;
 
 import com.code4ro.legalconsultation.comment.model.dto.CommentDetailDto;
+import com.code4ro.legalconsultation.comment.model.dto.CommentForChatDto;
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
 import com.code4ro.legalconsultation.document.core.service.DocumentService;
+import com.code4ro.legalconsultation.vote.service.VoteService;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
@@ -18,6 +20,9 @@ public abstract class CommentDocumentDataMapper {
     @Autowired
     private DocumentService documentService;
 
+    @Autowired
+    private VoteService voteService;
+
     @AfterMapping
     void afterDetailMapping(@MappingTarget CommentDetailDto dto, Comment entity) {
         final String nodeContent = entity.getDocumentNode().getContent();
@@ -27,5 +32,11 @@ public abstract class CommentDocumentDataMapper {
 
         final DocumentConsolidated documentConsolidated = documentService.getDocumentConsolidatedForComment(entity);
         dto.setDocumentTitle(documentConsolidated.getDocumentMetadata().getDocumentTitle());
+    }
+
+    @AfterMapping
+    void afterCommentForChatMapping(@MappingTarget CommentForChatDto dto, Comment comment) {
+        dto.setVoteCount(voteService.getVoteCountForComment(comment.getId()));
+        dto.setMyVote(voteService.getVoteForComment(comment.getId()));
     }
 }

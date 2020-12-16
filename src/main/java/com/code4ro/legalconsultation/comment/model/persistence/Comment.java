@@ -1,6 +1,5 @@
 package com.code4ro.legalconsultation.comment.model.persistence;
 
-import com.code4ro.legalconsultation.vote.model.persistence.Vote;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -34,9 +33,6 @@ public class Comment extends BaseEntity {
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Comment> replies;
-
-    @OneToMany
-    private List<Vote> votes;
 
     @Column(name = "last_edit_date", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)

@@ -3,9 +3,11 @@ package com.code4ro.legalconsultation.comment.controller;
 import com.code4ro.legalconsultation.comment.mapper.CommentMapper;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDetailDto;
 import com.code4ro.legalconsultation.comment.model.dto.CommentDto;
+import com.code4ro.legalconsultation.comment.model.dto.CommentForChatDto;
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
 import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.model.dto.PageDto;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
@@ -17,11 +19,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-import static com.code4ro.legalconsultation.comment.model.persistence.CommentStatus.APPROVED;
-import static com.code4ro.legalconsultation.comment.model.persistence.CommentStatus.REJECTED;
-
 @RestController
 @RequestMapping("/api/documentnodes/{nodeId}/comments")
+@Api(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class DocumentCommentsController {
 
@@ -59,15 +59,12 @@ public class DocumentCommentsController {
         return ResponseEntity.ok().build();
     }
 
-    @ApiOperation(value = "Get all comments of a node",
-            response = PageDto.class,
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ApiOperation("Get all comments of a node")
     @GetMapping
-    public ResponseEntity<PageDto<CommentDetailDto>> findAll(@ApiParam(value = "The id of the node") @PathVariable final UUID nodeId,
+    public ResponseEntity<PageDto<CommentForChatDto>> findAll(@ApiParam(value = "The id of the node") @PathVariable final UUID nodeId,
                                                              @ApiParam("Page object information being requested") final Pageable pageable) {
         Page<Comment> comments = commentService.findAll(nodeId, pageable);
-        Page<CommentDetailDto> commentsDto = comments.map(commentMapper::mapToCommentDetailDto);
+        Page<CommentForChatDto> commentsDto = comments.map(commentMapper::mapToCommentForChatDto);
 
         return ResponseEntity.ok(new PageDto<>(commentsDto));
     }

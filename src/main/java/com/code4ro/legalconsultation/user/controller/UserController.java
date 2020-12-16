@@ -117,7 +117,7 @@ public class UserController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "/currentUser")
     public CurrentUserDto currentUser() {
-        final ApplicationUser currentUser = currentUserService.getCurrentUser();
+        final ApplicationUser currentUser = currentUserService.getCurrentApplicationUser();
         return currentUser != null ? currentUserMapper.map(currentUser) : null;
     }
 
