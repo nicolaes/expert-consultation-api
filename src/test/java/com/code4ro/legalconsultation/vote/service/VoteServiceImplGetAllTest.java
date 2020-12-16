@@ -87,7 +87,7 @@ public class VoteServiceImplGetAllTest {
         assertEquals(uuidComment, actualVotes.iterator().next().getCommentId());
         Assertions.assertThat(new ObjectMapper().writeValueAsString(actualVotes))
                 .contains("\"commentId\":")
-                .doesNotContain("\"id\":");
+                .contains("\"id\":");
     }
 
     @Test
