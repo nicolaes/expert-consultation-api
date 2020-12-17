@@ -41,8 +41,13 @@ public class DocumentConsolidatedService {
     @Transactional(readOnly = true)
     public DocumentConsolidated getByMemberDocumentNodeId(final UUID id) {
         DocumentNode rootNodeForDocument = documentNodeService.findRootNodeForId(id);
+        return getByDocumentNodeId(rootNodeForDocument.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public DocumentConsolidated getByDocumentNodeId(final UUID id) {
         return documentConsolidatedRepository
-                .findByDocumentNodeId(rootNodeForDocument.getId())
+                .findByDocumentNodeId(id)
                 .orElseThrow(EntityNotFoundException::new);
     }
 

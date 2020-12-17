@@ -66,7 +66,7 @@ public class CommentServiceTest {
     public void before() {
         currentUser = RandomObjectFiller.createAndFill(ApplicationUser.class);
         currentUser.getUser().setRole(UserRole.ADMIN);
-        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(currentUser);
     }
 
     @Test
@@ -76,7 +76,7 @@ public class CommentServiceTest {
         final DocumentNode documentNode = documentNodeFactory.create();
         final Comment comment = new Comment();
         when(mapperService.map(commentDto)).thenReturn(comment);
-        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(currentUser);
         when(documentNodeService.findById(any())).thenReturn(documentNode);
 
         commentService.create(id, commentDto);
@@ -208,7 +208,7 @@ public class CommentServiceTest {
 
         when(commentRepository.findById(parentId)).thenReturn(Optional.of(parent));
         when(mapperService.map(commentDto)).thenReturn(reply);
-        when(currentUserService.getCurrentUser()).thenReturn(currentUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(currentUser);
 
         commentService.createReply(parentId, commentDto);
 
@@ -226,7 +226,7 @@ public class CommentServiceTest {
         final Comment comment1 = commentFactory.createEntity();
         final Comment comment2 = commentFactory.createEntity();
 
-        when(currentUserService.getCurrentUser()).thenReturn(adminUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(adminUser);
         when(commentRepository.findAllByStatus(CommentStatus.PENDING, pageable))
                 .thenReturn(new PageImpl<>(List.of(comment1, comment2)));
 
@@ -244,7 +244,7 @@ public class CommentServiceTest {
         final Comment comment1 = commentFactory.createEntity();
         final Comment comment2 = commentFactory.createEntity();
 
-        when(currentUserService.getCurrentUser()).thenReturn(ownerUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(ownerUser);
         when(commentRepository.findAllByStatus(CommentStatus.PENDING, pageable))
                 .thenReturn(new PageImpl<>(List.of(comment1, comment2)));
 
@@ -263,7 +263,7 @@ public class CommentServiceTest {
         final Comment comment2 = commentFactory.createEntity();
         final List<UUID> documentNodesIds = List.of(UUID.randomUUID(), UUID.randomUUID());
 
-        when(currentUserService.getCurrentUser()).thenReturn(ownerUser);
+        when(currentUserService.getCurrentApplicationUser()).thenReturn(ownerUser);
         when(documentService.getAllAssignedDocumentsNodeIds(ownerUser.getUser()))
                 .thenReturn(documentNodesIds);
         when(commentRepository.findAllByDocumentNode_IdInAndStatus(documentNodesIds, CommentStatus.PENDING, pageable))

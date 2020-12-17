@@ -1,5 +1,7 @@
 package com.code4ro.legalconsultation.core.controller;
 
+import com.code4ro.legalconsultation.authentication.model.persistence.ApplicationUser;
+import com.code4ro.legalconsultation.authentication.repository.ApplicationUserRepository;
 import com.code4ro.legalconsultation.core.factory.RandomObjectFiller;
 import com.code4ro.legalconsultation.authentication.model.dto.SignUpRequest;
 import com.code4ro.legalconsultation.invitation.model.persistence.Invitation;
@@ -18,6 +20,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,6 +38,8 @@ public abstract class AbstractControllerIntegrationTest {
     @Autowired
     protected ObjectMapper objectMapper;
     @Autowired
+    protected ApplicationUserRepository applicationUserRepository;
+    @Autowired
     protected ApplicationUserService applicationUserService;
     @MockBean
     protected JavaMailSender mailSender;
@@ -41,6 +47,8 @@ public abstract class AbstractControllerIntegrationTest {
     protected UserRepository userRepository;
     @Autowired
     protected InvitationRepository invitationRepository;
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     protected static String endpoint(Object... args) {
         final List<String> stringArgs = Arrays.stream(args)
@@ -63,5 +71,19 @@ public abstract class AbstractControllerIntegrationTest {
         signUpRequest.setInvitationCode(invitation.getCode());
         signUpRequest.setEmail(user.getEmail());
         applicationUserService.save(signUpRequest);
+    }
+
+    protected void removeMockUser() {
+        ApplicationUser user = applicationUserService.getByUsernameOrEmail("user");
+        applicationUserRepository.delete(user);
+        invitationRepository.deleteByUserId(user.getId());
+        userRepository.deleteById(user.getId());
+    }
+
+    protected void wrapInTransaction(Runnable runnable) {
+        new TransactionTemplate(transactionManager).execute(status -> {
+            runnable.run();
+            return null;
+        });
     }
 }

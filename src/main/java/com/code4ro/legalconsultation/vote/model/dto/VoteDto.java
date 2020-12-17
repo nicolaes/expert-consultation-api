@@ -27,7 +27,8 @@ public class VoteDto {
     private UUID commentId;
     private VoteType vote;
 
-    public VoteDto(UUID commentId, VoteType vote) {
+    public VoteDto(UUID id, UUID commentId, VoteType vote) {
+        this.id = id;
         this.commentId = commentId;
         this.vote = vote;
     }

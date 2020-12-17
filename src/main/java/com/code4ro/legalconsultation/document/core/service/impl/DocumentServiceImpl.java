@@ -96,15 +96,21 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Transactional(readOnly = true)
     @Override
-    public DocumentConsolidatedDto fetchConsolidatedByMetadataId(final UUID id) {
+    public DocumentConsolidatedDto fetchConsolidatedDtoByMetadataId(final UUID id) {
         final DocumentConsolidated document = documentConsolidatedService.getByDocumentMetadataId(id);
         return convertModelToDto(document);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public DocumentConsolidatedDto fetchConsolidatedByDocumentNodeId(UUID id) {
+    public DocumentConsolidatedDto fetchConsolidatedDtoByDocumentNodeId(UUID id) {
         return convertModelToDto(documentConsolidatedService.getByMemberDocumentNodeId(id));
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public DocumentConsolidated fetchConsolidatedByRootNodeId(UUID rootNodeId) {
+        return documentConsolidatedService.getByDocumentNodeId(rootNodeId);
     }
 
     private DocumentConsolidatedDto convertModelToDto(DocumentConsolidated document) {
@@ -203,8 +209,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional(readOnly = true)
-    public DocumentConsolidatedDto getDocumentConsolidatedForComment(Comment comment) {
+    public DocumentConsolidated getDocumentConsolidatedForComment(Comment comment) {
         final DocumentNode rootNode = documentNodeService.findRootNodeForId(comment.getDocumentNode().getId());
-        return fetchConsolidatedByDocumentNodeId(rootNode.getId());
+        return fetchConsolidatedByRootNodeId(rootNode.getId());
     }
 }

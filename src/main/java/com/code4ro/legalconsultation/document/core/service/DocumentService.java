@@ -13,7 +13,6 @@ import com.code4ro.legalconsultation.user.model.persistence.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -30,14 +29,16 @@ public interface DocumentService {
 
     //return the entire consolidated form of the document,
     //that contains the metadata and the breakdown into units
-    DocumentConsolidatedDto fetchConsolidatedByMetadataId(final UUID id);
+    DocumentConsolidatedDto fetchConsolidatedDtoByMetadataId(final UUID id);
 
     /**
      * @param id of one of the document nodes contained in the requested document
-     * @return the entire consolidated form of the document,
+     * @return the entire consolidated form DTO of the document,
      * that contains the metadata and the breakdown into units
      */
-    DocumentConsolidatedDto fetchConsolidatedByDocumentNodeId(final UUID id);
+    DocumentConsolidatedDto fetchConsolidatedDtoByDocumentNodeId(final UUID id);
+
+    DocumentConsolidated fetchConsolidatedByRootNodeId(UUID rootNodeId);
 
     //create a single document, including metadata and breakdown
     DocumentConsolidated create(final DocumentViewDto document);
@@ -59,5 +60,5 @@ public interface DocumentService {
 
     List<UUID> getAllAssignedDocumentsNodeIds(User user);
 
-    DocumentConsolidatedDto getDocumentConsolidatedForComment(Comment comment);
+    DocumentConsolidated getDocumentConsolidatedForComment(Comment comment);
 }

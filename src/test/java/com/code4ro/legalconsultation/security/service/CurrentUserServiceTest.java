@@ -37,7 +37,7 @@ public class CurrentUserServiceTest {
         when(securityContext.getAuthentication()).thenReturn(authentication);
         SecurityContextHolder.setContext(securityContext);
 
-        currentUserService.getCurrentUser();
+        currentUserService.getCurrentApplicationUser();
 
         verify(applicationUserService).getByUsernameOrEmail(applicationUser.getUsername());
     }
