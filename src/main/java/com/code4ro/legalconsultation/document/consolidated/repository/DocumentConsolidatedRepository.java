@@ -25,7 +25,7 @@ public interface DocumentConsolidatedRepository extends JpaRepository<DocumentCo
             "AND (dc.consultationDeadline IS NULL OR dc.consultationDeadline >= current_date) " +
             "AND dc.excludedFromConsultation = FALSE " +
             "AND dc.consultationEmailsSent = FALSE")
-    List<DocumentConsolidated> findAllInConsultation();
+    List<DocumentConsolidated> findAllInConsultationForEmailNotification();
 
     @Query("SELECT au " +
             "FROM DocumentConsolidated dc " +

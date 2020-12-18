@@ -27,7 +27,9 @@ public class MailScheduler {
     private final DocumentConfigurationRepository documentConfigurationRepository;
 
     @Autowired
-    public MailScheduler(MailApi mailApi, DocumentConsolidatedRepository documentConsolidatedRepository, DocumentConfigurationRepository documentConfigurationRepository) {
+    public MailScheduler(MailApi mailApi,
+                         DocumentConsolidatedRepository documentConsolidatedRepository,
+                         DocumentConfigurationRepository documentConfigurationRepository) {
         this.mailApi = mailApi;
         this.documentConsolidatedRepository = documentConsolidatedRepository;
         this.documentConfigurationRepository = documentConfigurationRepository;
@@ -39,7 +41,7 @@ public class MailScheduler {
         LOG.info("Sending document consultation e-mails");
         AtomicReference<Integer> emailCount = new AtomicReference<>(0);
 
-        List<DocumentConsolidated> documents = documentConsolidatedRepository.findAllInConsultation();
+        List<DocumentConsolidated> documents = documentConsolidatedRepository.findAllInConsultationForEmailNotification();
         documents.forEach(document -> {
             List<User> userList = documentConsolidatedRepository.findUsersByDocumentId(document.getId());
             emailCount.updateAndGet(v -> v + userList.size());
