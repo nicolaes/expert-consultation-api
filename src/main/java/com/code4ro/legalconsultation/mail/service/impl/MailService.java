@@ -83,9 +83,30 @@ public class MailService implements MailApi {
         final String translatedSubject = i18nService.translate("email.documentAssigned.subject");
         final String documentAssignedTemplate = getDocumentAssignedTemplate();
         users.forEach(user ->
-                buildAndSendEmail(translatedSubject, documentAssignedTemplate, getDocumentAssignedModel(documentMetadata, user), user.getEmail())
+                buildAndSendEmail(translatedSubject, documentAssignedTemplate, getDocumentInfoMap(documentMetadata, user), user.getEmail())
                     .ifPresent(failedEmails::add)
         );
+
+        if (!failedEmails.isEmpty()) {
+            throw LegalValidationException.builder()
+                    .i18nKey("user.Email.send.failed")
+                    .i8nArguments(failedEmails)
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
+    }
+
+    @Override
+    public void sendDocumentConsultationEmail(final DocumentMetadata documentMetadata, final List<User> users) {
+        final List<String> failedEmails = new ArrayList<>();
+
+        users.forEach(user -> buildAndSendEmail(
+                i18nService.translate("email.documentConsultation.subject")
+                        .replace("$documentTitle", documentMetadata.getDocumentTitle()),
+                "document-consultation-email-" + configuredLocale + ".ftl",
+                getDocumentInfoMap(documentMetadata, user),
+                user.getEmail()
+        ).ifPresent(failedEmails::add));
 
         if (!failedEmails.isEmpty()) {
             throw LegalValidationException.builder()
@@ -141,15 +162,11 @@ public class MailService implements MailApi {
         return "document-assigned-email-" + configuredLocale + ".ftl";
     }
 
-    private Map<String, String> getDocumentAssignedModel(final DocumentMetadata documentMetadata, final User user) {
+    private Map<String, String> getDocumentInfoMap(final DocumentMetadata documentMetadata, final User user) {
         return Map.of(
                 "username", getUserName(user),
-                "documenturl", getDocumentUrl(documentMetadata)
+                "documentUrl", documentUrl + "/" + documentMetadata.getId(),
+                "documentTitle", documentMetadata.getDocumentTitle()
         );
     }
-
-    private String getDocumentUrl(DocumentMetadata documentMetadata) {
-        return documentUrl + "/" + documentMetadata.getId();
-    }
-
 }
