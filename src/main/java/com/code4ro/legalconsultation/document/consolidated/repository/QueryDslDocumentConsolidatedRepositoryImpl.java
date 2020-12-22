@@ -12,7 +12,9 @@ import com.querydsl.jpa.JPQLQueryFactory;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Repository
 public class QueryDslDocumentConsolidatedRepositoryImpl implements QueryDslDocumentConsolidatedRepository {
@@ -27,7 +29,7 @@ public class QueryDslDocumentConsolidatedRepositoryImpl implements QueryDslDocum
         QDocumentConsolidated dc = QDocumentConsolidated.documentConsolidated;
         QDocumentConfiguration dConf = dc.documentConfiguration;
         return queryFactory
-                .select(Projections.fields(dc, dc.id, dConf, dc.documentMetadata))
+                .select(dc, dConf, dc.documentMetadata)
                 .from(dc)
                 .innerJoin(dConf)
                 .where(dConf.consultationStartDate.loe(Expressions.currentDate())
@@ -36,7 +38,14 @@ public class QueryDslDocumentConsolidatedRepositoryImpl implements QueryDslDocum
                         .and(dConf.excludedFromConsultation.isFalse())
                         .and(dConf.consultationEmailsSent.isFalse())
                 )
-                .fetch();
+                .fetch().stream()
+                .map(tuple -> {
+                    DocumentConsolidated documentConsolidated = Objects.requireNonNull(tuple.get(dc));
+                    documentConsolidated.setDocumentMetadata(tuple.get(dc.documentMetadata));
+                    documentConsolidated.setDocumentConfiguration(tuple.get(dConf));
+                    return documentConsolidated;
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
