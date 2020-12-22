@@ -5,11 +5,10 @@ import com.code4ro.legalconsultation.document.consolidated.model.persistence.Doc
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.QDocumentConsolidated;
 import com.code4ro.legalconsultation.user.model.persistence.QUser;
 import com.code4ro.legalconsultation.user.model.persistence.User;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.ListPath;
 import com.querydsl.jpa.JPQLQueryFactory;
 import org.springframework.stereotype.Repository;
+import static com.querydsl.core.group.GroupBy.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,12 +50,13 @@ public class QueryDslDocumentConsolidatedRepositoryImpl implements QueryDslDocum
     @Override
     public List<User> findUsersByDocumentId(UUID documentId) {
         QDocumentConsolidated dc = QDocumentConsolidated.documentConsolidated;
-        ListPath<User, QUser> au = dc.assignedUsers;
+        QUser u = QUser.user;
         return queryFactory
-                .select(Projections.fields(dc, au))
-                .from(dc)
-                .innerJoin(au)
-                .where(dc.id.eq(documentId))
-                .fetchOne().getAssignedUsers();
+                .from(dc, u)
+                .where(
+                        dc.assignedUsers.contains(u),
+                        dc.id.eq(documentId))
+                .transform(groupBy(dc.id).as(list(u)))
+                .get(documentId);
     }
 }
