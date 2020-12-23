@@ -10,7 +10,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface DocumentConsolidatedRepository extends JpaRepository<DocumentConsolidated, UUID> {
+public interface DocumentConsolidatedRepository extends
+        JpaRepository<DocumentConsolidated, UUID>,
+        QueryDslDocumentConsolidatedRepository {
     Optional<DocumentConsolidated> findByDocumentMetadataId(UUID id);
 
     Optional<DocumentConsolidated> findByDocumentNodeId(UUID id);

@@ -9,4 +9,5 @@ public interface MailApi {
 
     void sendRegisterMail(final List<Invitation> invitations);
     void sendDocumentAssignedEmail(final DocumentMetadata documentMetadata, final List<User> users);
+    void sendDocumentConsultationEmail(final DocumentMetadata documentMetadata, final List<User> users);
 }

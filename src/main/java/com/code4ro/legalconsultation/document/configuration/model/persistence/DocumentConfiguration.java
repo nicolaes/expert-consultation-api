@@ -47,6 +47,9 @@ public class DocumentConfiguration extends BaseEntity {
     @Column(name = "is_excluded_from_consultation")
     private Boolean excludedFromConsultation;
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean consultationEmailsSent;
+
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     private DocumentConsolidated documentConsolidated;

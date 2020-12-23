@@ -32,6 +32,11 @@ public class MailConfiguration {
             public void sendDocumentAssignedEmail(DocumentMetadata documentMetadata, List<User> users) {
                 LOG.info("Email sending not supported in dev environment.");
             }
+
+            @Override
+            public void sendDocumentConsultationEmail(DocumentMetadata documentMetadata, List<User> users) {
+                LOG.info("Email sending not supported in dev environment.");
+            }
         };
     }
 }
