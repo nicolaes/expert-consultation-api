@@ -25,23 +25,23 @@ public class QueryDslDocumentConsolidatedRepositoryImpl implements QueryDslDocum
 
     @Override
     public List<DocumentConsolidated> findAllInConsultationForEmailNotification() {
-        QDocumentConsolidated dc = QDocumentConsolidated.documentConsolidated;
-        QDocumentConfiguration dConf = dc.documentConfiguration;
+        QDocumentConsolidated qDocumentConsolidated = QDocumentConsolidated.documentConsolidated;
+        QDocumentConfiguration qDocumentConfiguration = qDocumentConsolidated.documentConfiguration;
         return queryFactory
-                .select(dc, dConf, dc.documentMetadata)
-                .from(dc)
-                .innerJoin(dConf)
-                .where(dConf.consultationStartDate.loe(Expressions.currentDate())
-                        .and(dConf.consultationDeadline.goe(Expressions.currentDate())
-                                .or(dConf.consultationDeadline.isNull()))
-                        .and(dConf.excludedFromConsultation.isFalse())
-                        .and(dConf.consultationEmailsSent.isFalse())
+                .select(qDocumentConsolidated, qDocumentConfiguration, qDocumentConsolidated.documentMetadata)
+                .from(qDocumentConsolidated)
+                .innerJoin(qDocumentConfiguration)
+                .where(qDocumentConfiguration.consultationStartDate.loe(Expressions.currentDate())
+                        .and(qDocumentConfiguration.consultationDeadline.goe(Expressions.currentDate())
+                                .or(qDocumentConfiguration.consultationDeadline.isNull()))
+                        .and(qDocumentConfiguration.excludedFromConsultation.isFalse())
+                        .and(qDocumentConfiguration.consultationEmailsSent.isFalse())
                 )
                 .fetch().stream()
                 .map(tuple -> {
-                    DocumentConsolidated documentConsolidated = Objects.requireNonNull(tuple.get(dc));
-                    documentConsolidated.setDocumentMetadata(tuple.get(dc.documentMetadata));
-                    documentConsolidated.setDocumentConfiguration(tuple.get(dConf));
+                    DocumentConsolidated documentConsolidated = Objects.requireNonNull(tuple.get(qDocumentConsolidated));
+                    documentConsolidated.setDocumentMetadata(tuple.get(qDocumentConsolidated.documentMetadata));
+                    documentConsolidated.setDocumentConfiguration(tuple.get(qDocumentConfiguration));
                     return documentConsolidated;
                 })
                 .collect(Collectors.toList());
@@ -49,14 +49,14 @@ public class QueryDslDocumentConsolidatedRepositoryImpl implements QueryDslDocum
 
     @Override
     public List<User> findUsersByDocumentId(UUID documentId) {
-        QDocumentConsolidated dc = QDocumentConsolidated.documentConsolidated;
-        QUser u = QUser.user;
+        QDocumentConsolidated qDocumentConsolidated = QDocumentConsolidated.documentConsolidated;
+        QUser qUser = QUser.user;
         return queryFactory
-                .from(dc, u)
+                .from(qDocumentConsolidated, qUser)
                 .where(
-                        dc.assignedUsers.contains(u),
-                        dc.id.eq(documentId))
-                .transform(groupBy(dc.id).as(list(u)))
+                        qDocumentConsolidated.assignedUsers.contains(qUser),
+                        qDocumentConsolidated.id.eq(documentId))
+                .transform(groupBy(qDocumentConsolidated.id).as(list(qUser)))
                 .get(documentId);
     }
 }

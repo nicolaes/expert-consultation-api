@@ -4,7 +4,7 @@ import com.code4ro.legalconsultation.core.exception.LegalValidationException;
 import com.code4ro.legalconsultation.document.configuration.model.persistence.DocumentConfiguration;
 import com.code4ro.legalconsultation.document.configuration.repository.DocumentConfigurationRepository;
 import com.code4ro.legalconsultation.document.consolidated.model.persistence.DocumentConsolidated;
-import com.code4ro.legalconsultation.document.consolidated.repository.QueryDslDocumentConsolidatedRepository;
+import com.code4ro.legalconsultation.document.consolidated.repository.DocumentConsolidatedRepository;
 import com.code4ro.legalconsultation.mail.service.MailApi;
 import com.code4ro.legalconsultation.user.model.persistence.User;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -23,29 +23,28 @@ public class MailScheduler {
     private static final Logger LOG = LoggerFactory.getLogger(MailScheduler.class);
 
     private final MailApi mailApi;
-    private final QueryDslDocumentConsolidatedRepository queryDslDocumentConsolidatedRepository;
+    private final DocumentConsolidatedRepository documentConsolidatedRepository;
     private final DocumentConfigurationRepository documentConfigurationRepository;
 
     @Autowired
     public MailScheduler(MailApi mailApi,
-                         QueryDslDocumentConsolidatedRepository queryDslDocumentConsolidatedRepository,
+                         DocumentConsolidatedRepository documentConsolidatedRepository,
                          DocumentConfigurationRepository documentConfigurationRepository) {
         this.mailApi = mailApi;
-        this.queryDslDocumentConsolidatedRepository = queryDslDocumentConsolidatedRepository;
+        this.documentConsolidatedRepository = documentConsolidatedRepository;
         this.documentConfigurationRepository = documentConfigurationRepository;
     }
 
-//    @Scheduled(cron = "0 0 6 * * *")
-    @Scheduled(cron = "*/5 * * * * *")
+    @Scheduled(cron = "0 0 6 * * *")
     @SchedulerLock(name = "sendMails")
     public void sendDocumentConsultationMails() {
         LOG.info("Sending document consultation e-mails");
         AtomicReference<Integer> emailCount = new AtomicReference<>(0);
 
-        List<DocumentConsolidated> documents = queryDslDocumentConsolidatedRepository
+        List<DocumentConsolidated> documents = documentConsolidatedRepository
                 .findAllInConsultationForEmailNotification();
         documents.forEach(document -> {
-            List<User> userList = queryDslDocumentConsolidatedRepository.findUsersByDocumentId(document.getId());
+            List<User> userList = documentConsolidatedRepository.findUsersByDocumentId(document.getId());
             emailCount.updateAndGet(v -> v + userList.size());
             try {
                 mailApi.sendDocumentConsultationEmail(document.getDocumentMetadata(), userList);
