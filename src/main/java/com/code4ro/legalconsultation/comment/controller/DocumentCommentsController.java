@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/documentnodes/{nodeId}/comments")
@@ -66,10 +67,9 @@ public class DocumentCommentsController {
     public ResponseEntity<PageDto<CommentForChatDto>> findAll(@ApiParam(value = "The id of the node") @PathVariable final UUID nodeId,
                                                              @ApiParam("Page object information being requested") final Pageable pageable) {
         Page<Comment> comments = commentService.findAll(nodeId, pageable);
-        List<UUID> commentIds = comments.map(BaseEntity::getId).getContent();
-        List<Comment> repliesForComments = commentService.findRepliesForComments(commentIds);
-        System.out.println(repliesForComments);
-        Page<CommentForChatDto> commentsDto = comments.map(commentMapper::mapToCommentForChatDto);
+        List<Comment> allReplies = commentService.findRepliesForComments(comments.map(BaseEntity::getId).getContent());
+        Page<CommentForChatDto> commentsDto = comments.map(c ->
+                commentMapper.mapToCommentForChatDto(c, allReplies.stream().filter(r -> r.getParent().getId().equals(c.getId())).collect(Collectors.toList())));
 
         return ResponseEntity.ok(new PageDto<>(commentsDto));
     }

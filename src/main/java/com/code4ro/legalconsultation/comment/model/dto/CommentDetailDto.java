@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CommentDetailDto extends CommentWithUserDto {
+public class CommentDetailDto extends CommentWithUserAbstract {
     private String user;
     private String documentTitle;
     private String nodeTitle;

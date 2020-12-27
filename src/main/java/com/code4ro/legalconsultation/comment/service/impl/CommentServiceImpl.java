@@ -118,8 +118,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Comment> findRepliesForComments(List<UUID> parentIds) {
-        return commentRepository.findByParentIdIn(parentIds);
+    public List<Comment> findRepliesForComments(List<UUID> commentIds) {
+        return commentRepository.findByParentIdIn(commentIds);
     }
 
     @Transactional(readOnly = true)
