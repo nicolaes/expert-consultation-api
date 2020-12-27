@@ -118,6 +118,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Transactional(readOnly = true)
     @Override
+    public List<Comment> findRepliesForComments(List<UUID> parentIds) {
+        return commentRepository.findByParentIdIn(parentIds);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public BigInteger count(UUID nodeId) {
         return commentRepository.countByDocumentNodeIdAndStatus(nodeId, CommentStatus.APPROVED);
     }

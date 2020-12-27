@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.UUID;
 
 public interface CommentService {
@@ -22,6 +23,8 @@ public interface CommentService {
     Page<Comment> findAll(UUID nodeId, Pageable pageable);
 
     Page<Comment> findAllReplies(UUID parentId, Pageable pageable);
+
+    List<Comment> findRepliesForComments(List<UUID> parentIds);
 
     BigInteger count(UUID nodeId);
 

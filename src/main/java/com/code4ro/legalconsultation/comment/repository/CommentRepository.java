@@ -19,6 +19,8 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     Page<Comment> findByParentId(UUID parentId, Pageable pageable);
 
+    List<Comment> findByParentIdIn(final List<UUID> parentIds);
+
     BigInteger countByDocumentNodeIdAndStatus(final UUID nodeId, final CommentStatus status);
 
     Page<Comment> findAllByStatus(CommentStatus status, Pageable pageable);

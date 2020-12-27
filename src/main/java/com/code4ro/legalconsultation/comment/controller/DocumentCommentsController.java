@@ -7,6 +7,7 @@ import com.code4ro.legalconsultation.comment.model.dto.CommentForChatDto;
 import com.code4ro.legalconsultation.comment.model.persistence.Comment;
 import com.code4ro.legalconsultation.comment.service.CommentService;
 import com.code4ro.legalconsultation.core.model.dto.PageDto;
+import com.code4ro.legalconsultation.core.model.persistence.BaseEntity;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -17,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -64,6 +66,9 @@ public class DocumentCommentsController {
     public ResponseEntity<PageDto<CommentForChatDto>> findAll(@ApiParam(value = "The id of the node") @PathVariable final UUID nodeId,
                                                              @ApiParam("Page object information being requested") final Pageable pageable) {
         Page<Comment> comments = commentService.findAll(nodeId, pageable);
+        List<UUID> commentIds = comments.map(BaseEntity::getId).getContent();
+        List<Comment> repliesForComments = commentService.findRepliesForComments(commentIds);
+        System.out.println(repliesForComments);
         Page<CommentForChatDto> commentsDto = comments.map(commentMapper::mapToCommentForChatDto);
 
         return ResponseEntity.ok(new PageDto<>(commentsDto));
